@@ -1,0 +1,3 @@
+pack build ghcr.io/neondyis/zulf-auto-be:latest --builder paketobuildpacks/builder:base --path . --env "BP_JVM_VERSION=17" --env "BP_OCI_SOURCE=https://github.com/neondyis/notes" --env --publish
+docker push ghcr.io/neondyis/zulf-auto-be:latest
+flyctl deploy --image ghcr.io/neondyis/zulf-auto-be:latest
