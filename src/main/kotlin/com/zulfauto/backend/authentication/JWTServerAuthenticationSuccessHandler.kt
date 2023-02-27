@@ -26,7 +26,7 @@ class JWTServerAuthenticationSuccessHandler(
 
         when (principal) {
             is User -> {
-                val roles = principal.authorities.map { it.authority }.toTypedArray();
+                val roles = principal.authorities.map { it.authority }.toTypedArray()
                 val accessToken = jwtService.accessToken(principal.username!!, FOUR_HOURS, roles)
                 val refreshToken = jwtService.refreshToken(principal.username!!, TWENTY_FOUR_HOURS, roles)
                 exchange.response.headers.set("Authorization", accessToken)

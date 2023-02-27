@@ -1,8 +1,6 @@
 package com.zulfauto.backend.controllers
 
-import com.zulfauto.backend.models.Expense
 import com.zulfauto.backend.models.Feature
-import com.zulfauto.backend.services.ExpenseService
 import com.zulfauto.backend.services.FeatureService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

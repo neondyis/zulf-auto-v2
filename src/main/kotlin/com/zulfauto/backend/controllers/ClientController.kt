@@ -1,8 +1,6 @@
 package com.zulfauto.backend.controllers
 
-import com.zulfauto.backend.models.CarFeature
 import com.zulfauto.backend.models.Client
-import com.zulfauto.backend.services.CarFeatureService
 import com.zulfauto.backend.services.ClientService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

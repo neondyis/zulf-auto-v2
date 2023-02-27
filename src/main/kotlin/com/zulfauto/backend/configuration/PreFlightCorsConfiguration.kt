@@ -24,8 +24,8 @@ class PreFlightCorsConfiguration {
         val config = CorsConfiguration().applyPermitDefaultValues()
         config.addExposedHeader(
                 "Authorization, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, "
-                        + "Content-Type, Access-Control-Request-Method, Custom-Filter-Header");
-        config.addAllowedHeader("*");
+                        + "Content-Type, Access-Control-Request-Method, Custom-Filter-Header")
+        config.addAllowedHeader("*")
         config.addAllowedMethod(HttpMethod.PUT)
         config.addAllowedMethod(HttpMethod.GET)
         config.addAllowedMethod(HttpMethod.PATCH)

@@ -1,13 +1,9 @@
 package com.zulfauto.backend.services
 
-import com.zulfauto.backend.models.CarFeature
 import com.zulfauto.backend.models.Feature
-import com.zulfauto.backend.repositories.CarFeatureRepository
 import com.zulfauto.backend.repositories.FeatureRepository
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Example
-import org.springframework.data.domain.ExampleMatcher
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException

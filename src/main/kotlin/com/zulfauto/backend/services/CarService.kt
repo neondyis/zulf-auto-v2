@@ -34,17 +34,26 @@ class CarService (@Autowired private val carRepository: CarRepository) {
 //            .switchIfEmpty(carRepository.findAll(Example.of(car, ExampleMatcher.matching().withIncludeNullValues())))
     }
 
-    fun update (car: Car): Mono<Car> {
+    fun singleUpdate (car: Car): Mono<Car> {
         return if (car.id !== null) {
-            carRepository.findById(car.id!!)
-                .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"No Car found with Id: " + car.id)))
-                .publishOn(Schedulers.boundedElastic())
-                .doOnSuccess { dest ->
-                    val car2 = update(car, dest)
-                    carRepository.save(car2)
-                        .subscribe()
-                }
+            updateHelper(car)
         } else Mono.error(ResponseStatusException(HttpStatus.BAD_REQUEST,"Provide a car id"))
+    }
+
+    fun bulkUpdate(cars: Flux<Car>): Mono<MutableList<Car>> {
+        return cars
+            .publishOn(Schedulers.boundedElastic())
+            .flatMap{ car-> updateHelper(car) }
+            .collectList()
+    }
+
+    fun updateHelper(car: Car): Mono<Car> {
+        return carRepository.findById(car.id!!)
+            .flatMap { dest ->
+                carRepository.save(update(car, dest))
+            }
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND, "No Car found with Id: " + car.id)))
+            .publishOn(Schedulers.boundedElastic())
     }
 
     fun delete (id: Int): Mono<Void> {
@@ -66,21 +75,21 @@ class CarService (@Autowired private val carRepository: CarRepository) {
 }
 
 private fun update(src: Car, dest: Car): Car {
-    dest.model = src.model
-    dest.brand = src.brand
-    dest.doorNo = src.doorNo
-    dest.registration = src.registration
-    dest.kilometers = src.kilometers
-    dest.purchasePrice = src.purchasePrice
-    dest.colour = src.colour
-    dest.metallic = src.metallic
-    dest.region = src.region
-    dest.emissionClass = src.emissionClass
-    dest.horsepower = src.horsepower
-    dest.emissionSticker = src.emissionSticker
-    dest.fuelType = src.fuelType
-    dest.cubicCapacity = src.cubicCapacity
-    dest.sellingPrice = src.sellingPrice
-    dest.lastUpdatedBy = src.lastUpdatedBy
+    src.model?.let{ dest.model = src.model }
+    src.brand?.let{ dest.brand = src.brand }
+    src.doorNo?.let{ dest.doorNo = src.doorNo }
+    src.registration?.let{ dest.registration = src.registration }
+    src.kilometers?.let{ dest.kilometers = src.kilometers }
+    src.purchasePrice?.let{dest.purchasePrice = src.purchasePrice}
+    src.colour?.let{dest.colour = src.colour}
+    src.metallic?.let{dest.metallic = src.metallic}
+    src.region?.let{dest.region = src.region}
+    src.emissionClass?.let{dest.emissionClass = src.emissionClass}
+    src.horsepower?.let{dest.horsepower = src.horsepower}
+    src.emissionSticker?.let{dest.emissionSticker = src.emissionSticker}
+    src.fuelType?.let{dest.fuelType = src.fuelType}
+    src.cubicCapacity?.let{dest.cubicCapacity = src.cubicCapacity}
+    src.sellingPrice?.let{dest.sellingPrice = src.sellingPrice}
+    src.lastUpdatedBy?.let{dest.lastUpdatedBy = src.lastUpdatedBy}
     return dest
 }

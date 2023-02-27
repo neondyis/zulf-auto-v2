@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toFlux
 
 @RestController
 @CrossOrigin
@@ -28,7 +29,13 @@ class CarController(@Autowired private val carService: CarService) {
     @PutMapping("/update")
     @PreAuthorize("hasRole('User')")
     fun updateCar(@RequestBody car: Car): ResponseEntity<Mono<Car>> {
-        return ResponseEntity.status(HttpStatus.OK).body(carService.update(car))
+        return ResponseEntity.status(HttpStatus.OK).body(carService.singleUpdate(car))
+    }
+
+    @PutMapping("/update/bulk")
+    @PreAuthorize("hasRole('User')")
+    fun bulkUpdateCar(@RequestBody cars: List<Car>): ResponseEntity<Mono<MutableList<Car>>> {
+        return ResponseEntity.status(HttpStatus.OK).body(carService.bulkUpdate(Flux.fromIterable(cars)))
     }
 
     @DeleteMapping("/delete/{id}")

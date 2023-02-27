@@ -65,12 +65,12 @@ class UserService(@Autowired private val userRepository: UserRepository,
     }
 
     fun register(signUpRequest: SignupRequest): Mono<Users> {
-        val user = Users();
-        user.username = signUpRequest.username;
-        user.password = encoder.encode(signUpRequest.password);
-        user.name = signUpRequest.name;
-        user.role = signUpRequest.role;
-        user.email = signUpRequest.email;
+        val user = Users()
+        user.username = signUpRequest.username
+        user.password = encoder.encode(signUpRequest.password)
+        user.name = signUpRequest.name
+        user.role = signUpRequest.role
+        user.email = signUpRequest.email
         return userRepository.findUserByUsername(signUpRequest.username)
             .flatMap<Users?> { _ -> Mono.error((ResponseStatusException(HttpStatus.BAD_REQUEST,"Username already exists")))}
             .switchIfEmpty(userRepository.save(user)

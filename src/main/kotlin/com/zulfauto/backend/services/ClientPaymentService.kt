@@ -1,9 +1,7 @@
 package com.zulfauto.backend.services
 
-import com.zulfauto.backend.models.Client
 import com.zulfauto.backend.models.ClientPayment
 import com.zulfauto.backend.repositories.ClientPaymentRepository
-import com.zulfauto.backend.repositories.ClientRepository
 import org.hibernate.query.sqm.tree.SqmNode
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Example

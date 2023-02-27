@@ -3,9 +3,6 @@ package com.zulfauto.backend.models
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import lombok.Data
-import lombok.Getter
-import lombok.Setter
 import org.hibernate.annotations.Generated
 import org.hibernate.annotations.GenerationTime
 import org.springframework.data.annotation.Id

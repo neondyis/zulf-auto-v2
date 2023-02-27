@@ -1,8 +1,6 @@
 package com.zulfauto.backend.controllers
 
-import com.zulfauto.backend.models.ClientPaidPayment
 import com.zulfauto.backend.models.ClientUnpaidPayment
-import com.zulfauto.backend.services.ClientPaidPaymentService
 import com.zulfauto.backend.services.ClientUnpaidPaymentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
