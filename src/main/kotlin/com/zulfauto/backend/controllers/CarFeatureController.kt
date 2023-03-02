@@ -5,7 +5,6 @@ import com.zulfauto.backend.models.CarFeature
 import com.zulfauto.backend.services.CarFeatureService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -16,7 +15,7 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/CarFeatures/features")
 class CarFeatureController(@Autowired private val carFeatureService: CarFeatureService) {
-    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all/filtered")
     fun getCarFeaturesByDynamicFilter(@RequestBody carFeature: CarFeature): ResponseEntity<Flux<CarFeatureDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.getAllByDynamicFilter(carFeature))
     }
@@ -27,7 +26,7 @@ class CarFeatureController(@Autowired private val carFeatureService: CarFeatureS
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.bulkUpdate(carFeatures))
     }
 
-    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all")
     fun getAllCarFeatures(): ResponseEntity<Flux<CarFeatureDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.getAll())
     }

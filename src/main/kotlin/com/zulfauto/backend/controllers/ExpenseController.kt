@@ -5,7 +5,6 @@ import com.zulfauto.backend.models.Expense
 import com.zulfauto.backend.services.ExpenseService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -16,12 +15,12 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/expenses")
 class ExpenseController(@Autowired private val expenseService: ExpenseService) {
-    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all/filtered")
     fun getExpensesByDynamicFilter(@RequestBody expense: Expense): ResponseEntity<Flux<ExpenseDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(expenseService.getAllByDynamicFilter(expense))
     }
 
-    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all")
     fun getAllExpenses(): ResponseEntity<Flux<ExpenseDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(expenseService.getAll())
     }

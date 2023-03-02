@@ -4,7 +4,6 @@ import com.zulfauto.backend.models.Client
 import com.zulfauto.backend.services.ClientService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -15,12 +14,12 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/clients")
 class ClientController(@Autowired private val clientService: ClientService) {
-    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all/filtered")
     fun getClientsByDynamicFilter(@RequestBody client: Client): ResponseEntity<Flux<Client>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientService.getAllByDynamicFilter(client))
     }
 
-    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all")
     fun getAllClients(): ResponseEntity<Flux<Client>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientService.getAll())
     }

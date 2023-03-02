@@ -5,7 +5,6 @@ import com.zulfauto.backend.models.ClientUnpaidPayment
 import com.zulfauto.backend.services.ClientUnpaidPaymentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -16,13 +15,13 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/clients/payments/unpaid")
 class ClientUnpaidPaymentController(@Autowired private val clientUnpaidPaymentService: ClientUnpaidPaymentService) {
-    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all/filtered")
     fun getUnpaidPaymentsByDynamicFilter(@RequestBody clientUnpaidPayment: ClientUnpaidPayment): ResponseEntity<Flux<ClientUnpaidPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK)
             .body(clientUnpaidPaymentService.getAllByDynamicFilter(clientUnpaidPayment))
     }
 
-    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all")
     fun getAllUnpaidPayments(): ResponseEntity<Flux<ClientUnpaidPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientUnpaidPaymentService.getAll())
     }

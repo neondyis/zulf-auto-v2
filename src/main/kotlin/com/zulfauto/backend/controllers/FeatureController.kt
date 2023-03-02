@@ -4,7 +4,6 @@ import com.zulfauto.backend.models.Feature
 import com.zulfauto.backend.services.FeatureService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -15,12 +14,12 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/features")
 class FeatureController(@Autowired private val featureService: FeatureService) {
-    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all/filtered")
     fun getFeaturesByDynamicFilter(@RequestBody feature: Feature): ResponseEntity<Flux<Feature>> {
         return ResponseEntity.status(HttpStatus.OK).body(feature.name?.let { featureService.getAllByDynamicFilter(it) })
     }
 
-    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    @GetMapping("/all")
     fun getAllFeatures(): ResponseEntity<Flux<Feature>> {
         return ResponseEntity.status(HttpStatus.OK).body(featureService.getAll())
     }
