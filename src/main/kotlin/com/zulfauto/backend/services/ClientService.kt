@@ -18,7 +18,7 @@ import reactor.core.scheduler.Schedulers
 class ClientService(@Autowired private val clientRepository: ClientRepository) {
     fun getAll (): Flux<Client> {
         return clientRepository.findAll()
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"No Client found")))
+            .switchIfEmpty(Mono.just(Client()))
     }
 
     /**

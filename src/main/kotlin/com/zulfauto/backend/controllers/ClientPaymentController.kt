@@ -1,5 +1,6 @@
 package com.zulfauto.backend.controllers
 
+import com.zulfauto.backend.dtos.ClientPaymentDto
 import com.zulfauto.backend.models.ClientPayment
 import com.zulfauto.backend.services.ClientPaymentService
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,30 +16,38 @@ import reactor.core.publisher.Mono
 @RequestMapping("/api/clients/payments")
 class ClientPaymentController(@Autowired private val clientPaymentService: ClientPaymentService) {
     @GetMapping("/all/filtered")
-    fun getCarsByDynamicFilter(@RequestBody clientPayment: ClientPayment): ResponseEntity<Flux<ClientPayment>> {
+    fun getPaymentsByDynamicFilter(@RequestBody clientPayment: ClientPayment): ResponseEntity<Flux<ClientPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientPaymentService.getAllByDynamicFilter(clientPayment))
     }
 
     @GetMapping("/all")
-    fun getAllCars(): ResponseEntity<Flux<ClientPayment>> {
+    fun getAllPayments(): ResponseEntity<Flux<ClientPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientPaymentService.getAll())
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('User')")
-    fun updateCar(@RequestBody clientPayment: ClientPayment): ResponseEntity<Mono<ClientPayment>> {
+    fun updatePayment(@RequestBody clientPayment: ClientPayment): ResponseEntity<Mono<ClientPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientPaymentService.update(clientPayment))
     }
 
+    @PutMapping("/update/bulk")
+    @PreAuthorize("hasRole('User')")
+    fun bulkUpdatePayment(@RequestBody clientPayment: List<ClientPayment>): ResponseEntity<Mono<MutableList<ClientPaymentDto>>> {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(clientPaymentService.bulkUpdate(Flux.fromIterable(clientPayment)))
+    }
+
+
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('Admin')")
-    fun updateCar(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
+    fun deletePayment(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientPaymentService.delete(id))
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('Admin')")
-    fun createCar(@RequestBody clientPayment: ClientPayment): ResponseEntity<Mono<ClientPayment>> {
+    fun createPayment(@RequestBody clientPayment: ClientPayment): ResponseEntity<Mono<ClientPayment>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(clientPaymentService.save(clientPayment))
     }
 }

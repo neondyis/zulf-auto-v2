@@ -15,12 +15,12 @@ import reactor.core.publisher.Mono
 @RequestMapping("/api/users")
 class UserController(@Autowired private val userService: UserService) {
     @GetMapping("/all/filtered")
-    fun getCarsByDynamicFilter(@RequestBody user: Users): ResponseEntity<Flux<Users>> {
+    fun getUsersByDynamicFilter(@RequestBody user: Users): ResponseEntity<Flux<Users>> {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAllByDynamicFilter(user))
     }
 
     @GetMapping("/all")
-    fun getAllCars(): ResponseEntity<Flux<Users>> {
+    fun getAllUsers(): ResponseEntity<Flux<Users>> {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAll())
     }
 
@@ -31,7 +31,7 @@ class UserController(@Autowired private val userService: UserService) {
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('User')")
-    fun updateCar(@RequestBody expense: Users): ResponseEntity<Mono<Users>> {
+    fun updateUser(@RequestBody expense: Users): ResponseEntity<Mono<Users>> {
         return ResponseEntity.status(HttpStatus.OK).body(userService.update(expense))
     }
 }

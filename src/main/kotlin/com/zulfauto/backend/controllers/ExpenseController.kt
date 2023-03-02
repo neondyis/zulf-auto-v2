@@ -1,5 +1,6 @@
 package com.zulfauto.backend.controllers
 
+import com.zulfauto.backend.dtos.ExpenseDto
 import com.zulfauto.backend.models.Expense
 import com.zulfauto.backend.services.ExpenseService
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,30 +16,37 @@ import reactor.core.publisher.Mono
 @RequestMapping("/api/expenses")
 class ExpenseController(@Autowired private val expenseService: ExpenseService) {
     @GetMapping("/all/filtered")
-    fun getCarsByDynamicFilter(@RequestBody expense: Expense): ResponseEntity<Flux<Expense>> {
+    fun getExpensesByDynamicFilter(@RequestBody expense: Expense): ResponseEntity<Flux<ExpenseDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(expenseService.getAllByDynamicFilter(expense))
     }
 
     @GetMapping("/all")
-    fun getAllCars(): ResponseEntity<Flux<Expense>> {
+    fun getAllExpenses(): ResponseEntity<Flux<ExpenseDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(expenseService.getAll())
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('User')")
-    fun updateCar(@RequestBody expense: Expense): ResponseEntity<Mono<Expense>> {
+    fun updateExpense(@RequestBody expense: Expense): ResponseEntity<Mono<ExpenseDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(expenseService.update(expense))
     }
 
+    @PutMapping("/update/bulk")
+    @PreAuthorize("hasRole('User')")
+    fun bulkUpdatePayment(@RequestBody expense: List<Expense>): ResponseEntity<Mono<MutableList<ExpenseDto>>> {
+        return ResponseEntity.status(HttpStatus.OK).body(expenseService.bulkUpdate(Flux.fromIterable(expense)))
+    }
+
+
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('Admin')")
-    fun updateCar(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
+    fun deleteExpense(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
         return ResponseEntity.status(HttpStatus.OK).body(expenseService.delete(id))
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('Admin')")
-    fun createCar(@RequestBody expense: Expense): ResponseEntity<Mono<Expense>> {
+    fun createExpense(@RequestBody expense: Expense): ResponseEntity<Mono<Expense>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(expenseService.save(expense))
     }
 }

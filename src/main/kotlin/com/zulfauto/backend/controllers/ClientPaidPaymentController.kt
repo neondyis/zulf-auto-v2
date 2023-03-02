@@ -1,5 +1,6 @@
 package com.zulfauto.backend.controllers
 
+import com.zulfauto.backend.dtos.ClientPaidPaymentDto
 import com.zulfauto.backend.models.ClientPaidPayment
 import com.zulfauto.backend.services.ClientPaidPaymentService
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,30 +16,44 @@ import reactor.core.publisher.Mono
 @RequestMapping("/api/clients/payments/paid")
 class ClientPaidPaymentController(@Autowired private val clientPaidPaymentService: ClientPaidPaymentService) {
     @GetMapping("/all/filtered")
-    fun getCarsByDynamicFilter(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Flux<ClientPaidPayment>> {
-        return ResponseEntity.status(HttpStatus.OK).body(clientPaidPaymentService.getAllByDynamicFilter(clientPaidPayment))
+    fun getPaidPaymentByDynamicFilter(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Flux<ClientPaidPaymentDto>> {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(clientPaidPaymentService.getAllByDynamicFilter(clientPaidPayment))
     }
 
     @GetMapping("/all")
-    fun getAllCars(): ResponseEntity<Flux<ClientPaidPayment>> {
+    fun getAllPaidPayment(): ResponseEntity<Flux<ClientPaidPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientPaidPaymentService.getAll())
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('User')")
-    fun updateCar(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Mono<ClientPaidPayment>> {
+    fun updatePaidPayment(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Mono<ClientPaidPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientPaidPaymentService.update(clientPaidPayment))
+    }
+
+    @PutMapping("/update/bulk")
+    @PreAuthorize("hasRole('User')")
+    fun bulkUpdatePaidPayment(@RequestBody clientPaidPayments: List<ClientPaidPayment>): ResponseEntity<Mono<MutableList<ClientPaidPaymentDto>>> {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(clientPaidPaymentService.bulkUpdate(Flux.fromIterable(clientPaidPayments)))
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('Admin')")
-    fun updateCar(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
+    fun deletePaidPayment(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientPaidPaymentService.delete(id))
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('Admin')")
-    fun createCar(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Mono<ClientPaidPayment>> {
+    fun createPaidPayment(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Mono<ClientPaidPayment>> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clientPaidPaymentService.save(clientPaidPayment))
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasRole('Admin')")
+    fun importPaidPayments(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Mono<ClientPaidPayment>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(clientPaidPaymentService.save(clientPaidPayment))
     }
 }

@@ -1,5 +1,6 @@
 package com.zulfauto.backend.controllers
 
+import com.zulfauto.backend.dtos.CarFeatureDto
 import com.zulfauto.backend.models.CarFeature
 import com.zulfauto.backend.services.CarFeatureService
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,33 +13,39 @@ import reactor.core.publisher.Mono
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/cars/features")
+@RequestMapping("/api/CarFeatures/features")
 class CarFeatureController(@Autowired private val carFeatureService: CarFeatureService) {
     @GetMapping("/all/filtered")
-    fun getCarsByDynamicFilter(@RequestBody carFeature: CarFeature): ResponseEntity<Flux<CarFeature>> {
+    fun getCarFeaturesByDynamicFilter(@RequestBody carFeature: CarFeature): ResponseEntity<Flux<CarFeatureDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.getAllByDynamicFilter(carFeature))
     }
 
+    @PutMapping("/update/bulk")
+    @PreAuthorize("hasRole('User')")
+    fun bulkUpdateCarFeature(@RequestBody carFeatures: List<CarFeature>): ResponseEntity<Mono<MutableList<CarFeatureDto>>> {
+        return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.bulkUpdate(Flux.fromIterable(carFeatures)))
+    }
+
     @GetMapping("/all")
-    fun getAllCars(): ResponseEntity<Flux<CarFeature>> {
+    fun getAllCarFeatures(): ResponseEntity<Flux<CarFeatureDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.getAll())
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('User')")
-    fun updateCar(@RequestBody carFeature: CarFeature): ResponseEntity<Mono<CarFeature>> {
+    fun updateCarFeature(@RequestBody carFeature: CarFeature): ResponseEntity<Mono<CarFeatureDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.update(carFeature))
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('Admin')")
-    fun updateCar(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
+    fun deleteCarFeature(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.delete(id))
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('Admin')")
-    fun createCar(@RequestBody carFeature: CarFeature): ResponseEntity<Mono<CarFeature>> {
+    fun createCarFeature(@RequestBody carFeature: CarFeature): ResponseEntity<Mono<CarFeature>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(carFeatureService.save(carFeature))
     }
 }

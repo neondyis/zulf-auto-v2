@@ -15,30 +15,30 @@ import reactor.core.publisher.Mono
 @RequestMapping("/api/features")
 class FeatureController(@Autowired private val featureService: FeatureService) {
     @GetMapping("/all/filtered")
-    fun getCarsByDynamicFilter(@RequestBody feature: Feature): ResponseEntity<Flux<Feature>> {
+    fun getFeaturesByDynamicFilter(@RequestBody feature: Feature): ResponseEntity<Flux<Feature>> {
         return ResponseEntity.status(HttpStatus.OK).body(feature.name?.let { featureService.getAllByDynamicFilter(it) })
     }
 
     @GetMapping("/all")
-    fun getAllCars(): ResponseEntity<Flux<Feature>> {
+    fun getAllFeatures(): ResponseEntity<Flux<Feature>> {
         return ResponseEntity.status(HttpStatus.OK).body(featureService.getAll())
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('User')")
-    fun updateCar(@RequestBody feature: Feature): ResponseEntity<Mono<Feature>> {
+    fun updateFeature(@RequestBody feature: Feature): ResponseEntity<Mono<Feature>> {
         return ResponseEntity.status(HttpStatus.OK).body(featureService.update(feature))
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('Admin')")
-    fun updateCar(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
+    fun deleteFeature(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
         return ResponseEntity.status(HttpStatus.OK).body(featureService.delete(id))
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('Admin')")
-    fun createCar(@RequestBody feature: Feature): ResponseEntity<Mono<Feature>> {
+    fun createFeature(@RequestBody feature: Feature): ResponseEntity<Mono<Feature>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(featureService.save(feature))
     }
 }

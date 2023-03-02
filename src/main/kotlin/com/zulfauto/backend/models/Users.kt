@@ -1,9 +1,14 @@
 package com.zulfauto.backend.models
 
-import jakarta.persistence.*
+import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.Column
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.data.annotation.Id
+import org.springframework.security.core.GrantedAuthority
+
 
 @Table(name = "users")
 open class Users : GrantedAuthority {
@@ -18,6 +23,7 @@ open class Users : GrantedAuthority {
 
     @NotNull
     @Column(name = "password", nullable = false, length = Integer.MAX_VALUE)
+    @JsonIgnore
     open var password: String? = null
 
     @NotNull
@@ -25,6 +31,7 @@ open class Users : GrantedAuthority {
     open var email: String? = null
 
     @Column(name = "role")
+    @JsonIgnore
     open var role: Int? = null
 
     @NotNull

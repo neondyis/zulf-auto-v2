@@ -1,6 +1,9 @@
 package com.zulfauto.backend.models
 
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import org.springframework.data.annotation.Id
 
@@ -11,7 +14,6 @@ open class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     open var id: Int? = null
-
 
     @NotNull
     @Column(name = "id_no", nullable = false, length = Integer.MAX_VALUE)

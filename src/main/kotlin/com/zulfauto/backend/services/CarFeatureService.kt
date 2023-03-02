@@ -1,7 +1,12 @@
 package com.zulfauto.backend.services
 
+import com.zulfauto.backend.dtos.CarFeatureDto
+import com.zulfauto.backend.models.Car
 import com.zulfauto.backend.models.CarFeature
+import com.zulfauto.backend.models.Feature
 import com.zulfauto.backend.repositories.CarFeatureRepository
+import com.zulfauto.backend.repositories.CarRepository
+import com.zulfauto.backend.repositories.FeatureRepository
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Example
@@ -12,12 +17,22 @@ import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import reactor.util.function.Tuple2
 
 @Service
-class CarFeatureService(@Autowired private val carFeatureRepository: CarFeatureRepository) {
-    fun getAll (): Flux<CarFeature> {
+class CarFeatureService(
+    @Autowired private val carFeatureRepository: CarFeatureRepository,
+    @Autowired private val carRepository: CarRepository,
+    @Autowired private val featureRepository: FeatureRepository
+) {
+    fun getAll(): Flux<CarFeatureDto> {
         return carFeatureRepository.findAll()
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"No Car Features found")))
+            .flatMap { cf ->
+                Mono.just(cf)
+                    .zipWith(carRepository.findById(cf.car!!).zipWith(featureRepository.findById(cf.feature!!)))
+            }
+            .map { cf -> mapToDTO(cf) }
+            .switchIfEmpty(Mono.just(CarFeatureDto()))
     }
 
     /**
@@ -25,30 +40,57 @@ class CarFeatureService(@Autowired private val carFeatureRepository: CarFeatureR
      * Then if empty checks the database in OR condition of nonnull values
      * Commented out code is if there is no match return everything but dont think that is needed
      **/
-    fun getAllByDynamicFilter (carFeature: CarFeature): Flux<CarFeature> {
+    fun getAllByDynamicFilter(carFeature: CarFeature): Flux<CarFeatureDto> {
         return carFeatureRepository.findAll(Example.of(carFeature, ExampleMatcher.matchingAll().withIgnoreCase()))
             .switchIfEmpty(carFeatureRepository.findAll(Example.of(carFeature, ExampleMatcher.matchingAny())))
-            .doOnError { error -> log.error("Failed to get car features in dynamic query.", error)  }
+            .doOnError { error -> log.error("Failed to get car features in dynamic query.", error) }
+            .flatMap { cf ->
+                Mono.just(cf)
+                    .zipWith(carRepository.findById(cf.car!!).zipWith(featureRepository.findById(cf.feature!!)))
+            }
+            .map { cf -> mapToDTO(cf) }
 //            .switchIfEmpty(carRepository.findAll(Example.of(car, ExampleMatcher.matching().withIncludeNullValues())))
     }
 
-    fun update (car: CarFeature): Mono<CarFeature> {
-        return if (car.id !== null) {
-            carFeatureRepository.findById(car.id!!)
-                .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"No Car found with Id: " + car.id)))
-                .publishOn(Schedulers.boundedElastic())
-                .doOnSuccess { dest ->
-                    val carFeature = updateCarFeature(car, dest)
-                    carFeatureRepository.save(carFeature)
-                        .subscribe()
-                }
-        } else Mono.error(ResponseStatusException(HttpStatus.BAD_REQUEST,"Provide a car feature id"))
+    fun update(carFeature: CarFeature): Mono<CarFeatureDto> {
+        return if (carFeature.id !== null) {
+            updateHelper(carFeature)
+        } else Mono.error(ResponseStatusException(HttpStatus.BAD_REQUEST, "Provide a car feature id"))
     }
 
-    fun delete (id: Int): Mono<Void> {
+    fun bulkUpdate(carFeatures: Flux<CarFeature>): Mono<MutableList<CarFeatureDto>> {
+        return carFeatures
+            .publishOn(Schedulers.boundedElastic())
+            .flatMap { cf -> updateHelper(cf) }
+            .collectList()
+    }
+
+    fun updateHelper(carFeature: CarFeature): Mono<CarFeatureDto> {
+        return carFeatureRepository.findById(carFeature.id!!)
+            .switchIfEmpty(
+                Mono.error(
+                    ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No Car Feature found with Id: " + carFeature.id
+                    )
+                )
+            )
+            .publishOn(Schedulers.boundedElastic())
+            .flatMap { dest ->
+                val cf = updateCarFeature(carFeature, dest)
+                carFeatureRepository.save(cf)
+            }.flatMap { cf ->
+                Mono.just(cf)
+                    .zipWith(carRepository.findById(cf.car!!).zipWith(featureRepository.findById(cf.feature!!)))
+            }
+            .map { cf -> mapToDTO(cf) }
+    }
+
+
+    fun delete(id: Int): Mono<Void> {
         return carFeatureRepository.findById(id)
             .flatMap { carFeatureRepository.deleteById(id) }
-            .doOnError { error -> log.error("Failed to delete car feature.", error)  }
+            .doOnError { error -> log.error("Failed to delete car feature.", error) }
             .doOnSuccess { log.info("Deleted car feature successfully $id") }
             .then()
     }
@@ -67,4 +109,8 @@ private fun updateCarFeature(src: CarFeature, dest: CarFeature): CarFeature {
     dest.car = src.car
     dest.feature = src.feature
     return dest
+}
+
+private fun mapToDTO(carFeatureTuple: Tuple2<CarFeature, Tuple2<Car, Feature>>): CarFeatureDto {
+    return CarFeatureDto(carFeatureTuple.t1, carFeatureTuple.t2.t2, carFeatureTuple.t2.t1)
 }

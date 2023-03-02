@@ -15,30 +15,30 @@ import reactor.core.publisher.Mono
 @RequestMapping("/api/clients")
 class ClientController(@Autowired private val clientService: ClientService) {
     @GetMapping("/all/filtered")
-    fun getCarsByDynamicFilter(@RequestBody client: Client): ResponseEntity<Flux<Client>> {
+    fun getClientsByDynamicFilter(@RequestBody client: Client): ResponseEntity<Flux<Client>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientService.getAllByDynamicFilter(client))
     }
 
     @GetMapping("/all")
-    fun getAllCars(): ResponseEntity<Flux<Client>> {
+    fun getAllClients(): ResponseEntity<Flux<Client>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientService.getAll())
     }
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('User')")
-    fun updateCar(@RequestBody client: Client): ResponseEntity<Mono<Client>> {
+    fun updateClient(@RequestBody client: Client): ResponseEntity<Mono<Client>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientService.update(client))
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('Admin')")
-    fun updateCar(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
+    fun deleteClient(@PathVariable("id") id: Int): ResponseEntity<Mono<Void>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientService.delete(id))
     }
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('Admin')")
-    fun createCar(@RequestBody client: Client): ResponseEntity<Mono<Client>> {
+    fun createClient(@RequestBody client: Client): ResponseEntity<Mono<Client>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(clientService.save(client))
     }
 }

@@ -15,7 +15,7 @@ import reactor.core.scheduler.Schedulers
 class FeatureService(@Autowired private val featureRepository: FeatureRepository) {
     fun getAll (): Flux<Feature> {
         return featureRepository.findAll()
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"No Features found")))
+            .switchIfEmpty(Mono.just(Feature()))
     }
 
     fun getAllByDynamicFilter (name: String): Flux<Feature> {

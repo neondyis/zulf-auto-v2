@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
-import java.util.*
 
 @Service
 class UserService(@Autowired private val userRepository: UserRepository,
@@ -51,7 +50,7 @@ class UserService(@Autowired private val userRepository: UserRepository,
 
     fun getAll(): Flux<Users> {
         return userRepository.findAll()
-                .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"No Users found")))
+            .switchIfEmpty(Mono.just(Users()))
     }
 
     fun findAllPaged(pageable: Pageable): Mono<Page<Users>> {
