@@ -92,12 +92,11 @@ class ExpenseService(
 
     }
 
-    fun import(expenses: Flux<Expense>): Mono<MutableList<Expense>> {
+    fun import(expenses: Flux<Expense>): Flux<Expense> {
         return expenses
             .publishOn(Schedulers.boundedElastic())
             .filter { it.importTax != null }
             .flatMap { expense -> expenseRepository.save(expense) }
-            .collectList()
     }
 }
 

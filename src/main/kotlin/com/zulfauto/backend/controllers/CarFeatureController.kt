@@ -5,6 +5,7 @@ import com.zulfauto.backend.models.CarFeature
 import com.zulfauto.backend.services.CarFeatureService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -15,18 +16,18 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/CarFeatures/features")
 class CarFeatureController(@Autowired private val carFeatureService: CarFeatureService) {
-    @GetMapping("/all/filtered")
+    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun getCarFeaturesByDynamicFilter(@RequestBody carFeature: CarFeature): ResponseEntity<Flux<CarFeatureDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.getAllByDynamicFilter(carFeature))
     }
 
     @PutMapping("/update/bulk")
     @PreAuthorize("hasRole('User')")
-    fun bulkUpdateCarFeature(@RequestBody carFeatures: List<CarFeature>): ResponseEntity<Mono<MutableList<CarFeatureDto>>> {
-        return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.bulkUpdate(Flux.fromIterable(carFeatures)))
+    fun bulkUpdateCarFeature(@RequestBody carFeatures: Flux<CarFeature>): ResponseEntity<Mono<MutableList<CarFeatureDto>>> {
+        return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.bulkUpdate(carFeatures))
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun getAllCarFeatures(): ResponseEntity<Flux<CarFeatureDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carFeatureService.getAll())
     }
@@ -47,5 +48,11 @@ class CarFeatureController(@Autowired private val carFeatureService: CarFeatureS
     @PreAuthorize("hasRole('Admin')")
     fun createCarFeature(@RequestBody carFeature: CarFeature): ResponseEntity<Mono<CarFeature>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(carFeatureService.save(carFeature))
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasRole('Admin')")
+    fun importCarFeature(@RequestBody carFeatures: Flux<CarFeature>): ResponseEntity<Flux<CarFeature>> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(carFeatureService.import(carFeatures))
     }
 }

@@ -52,12 +52,11 @@ class FeatureService(@Autowired private val featureRepository: FeatureRepository
 
     }
 
-    fun import(features: Flux<Feature>): Mono<MutableList<Feature>> {
+    fun import(features: Flux<Feature>): Flux<Feature> {
         return features
             .publishOn(Schedulers.boundedElastic())
             .filter { it.name != null }
             .flatMap { feature -> featureRepository.save(feature) }
-            .collectList()
     }
 }
 

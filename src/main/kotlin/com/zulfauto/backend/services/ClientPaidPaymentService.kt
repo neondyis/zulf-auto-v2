@@ -108,12 +108,11 @@ class ClientPaidPaymentService(
 
     }
 
-    fun import(clientPaidPayments: Flux<ClientPaidPayment>): Mono<MutableList<ClientPaidPayment>> {
+    fun import(clientPaidPayments: Flux<ClientPaidPayment>): Flux<ClientPaidPayment> {
         return clientPaidPayments
             .publishOn(Schedulers.boundedElastic())
             .filter { it.amount != null }
             .flatMap { cpp -> clientPaidPaymentRepository.save(cpp) }
-            .collectList()
     }
 }
 

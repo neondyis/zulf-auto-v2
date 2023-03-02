@@ -60,12 +60,11 @@ class ClientService(@Autowired private val clientRepository: ClientRepository) {
 
     }
 
-    fun import(clients: Flux<Client>): Mono<MutableList<Client>> {
+    fun import(clients: Flux<Client>): Flux<Client> {
         return clients
             .publishOn(Schedulers.boundedElastic())
             .filter { it.firstName != null }
             .flatMap { car -> clientRepository.save(car) }
-            .collectList()
     }
 }
 

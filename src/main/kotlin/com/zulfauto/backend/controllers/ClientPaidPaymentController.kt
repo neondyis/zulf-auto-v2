@@ -5,6 +5,7 @@ import com.zulfauto.backend.models.ClientPaidPayment
 import com.zulfauto.backend.services.ClientPaidPaymentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -15,13 +16,13 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/clients/payments/paid")
 class ClientPaidPaymentController(@Autowired private val clientPaidPaymentService: ClientPaidPaymentService) {
-    @GetMapping("/all/filtered")
+    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun getPaidPaymentByDynamicFilter(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Flux<ClientPaidPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK)
             .body(clientPaidPaymentService.getAllByDynamicFilter(clientPaidPayment))
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun getAllPaidPayment(): ResponseEntity<Flux<ClientPaidPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientPaidPaymentService.getAll())
     }
@@ -53,7 +54,7 @@ class ClientPaidPaymentController(@Autowired private val clientPaidPaymentServic
 
     @PostMapping("/import")
     @PreAuthorize("hasRole('Admin')")
-    fun importPaidPayments(@RequestBody clientPaidPayment: ClientPaidPayment): ResponseEntity<Mono<ClientPaidPayment>> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(clientPaidPaymentService.save(clientPaidPayment))
+    fun importPaidPayments(@RequestBody clientPaidPayments: Flux<ClientPaidPayment>): ResponseEntity<Flux<ClientPaidPayment>> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clientPaidPaymentService.import(clientPaidPayments))
     }
 }

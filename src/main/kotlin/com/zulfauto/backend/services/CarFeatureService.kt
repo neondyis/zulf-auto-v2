@@ -103,12 +103,11 @@ class CarFeatureService(
             .doOnSuccess { c -> log.info(c.toString()) }
     }
 
-    fun import(carFeatures: Flux<CarFeature>): Mono<MutableList<CarFeature>> {
+    fun import(carFeatures: Flux<CarFeature>): Flux<CarFeature> {
         return carFeatures
             .publishOn(Schedulers.boundedElastic())
             .filter { it.car != null }
             .flatMap { cf -> carFeatureRepository.save(cf) }
-            .collectList()
     }
 }
 

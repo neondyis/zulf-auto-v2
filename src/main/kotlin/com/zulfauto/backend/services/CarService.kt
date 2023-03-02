@@ -85,12 +85,11 @@ class CarService(
             .doOnSuccess { c -> log.info(c.toString()) }
     }
 
-    fun import(cars: Flux<Car>): Mono<MutableList<Car>> {
+    fun import(cars: Flux<Car>): Flux<Car> {
         return cars
             .publishOn(Schedulers.boundedElastic())
             .filter { it.brand != null }
             .flatMap { car -> carRepository.save(car) }
-            .collectList()
     }
 
 }

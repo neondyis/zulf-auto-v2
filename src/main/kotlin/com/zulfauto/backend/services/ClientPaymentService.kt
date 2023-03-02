@@ -102,12 +102,11 @@ class ClientPaymentService(
 
     }
 
-    fun import(cars: Flux<Car>): Mono<MutableList<Car>> {
-        return cars
+    fun import(clientPayments: Flux<ClientPayment>): Flux<ClientPayment> {
+        return clientPayments
             .publishOn(Schedulers.boundedElastic())
-            .filter { it.brand != null }
-            .flatMap { car -> carRepository.save(car) }
-            .collectList()
+            .filter { it.car != null && it.client != null }
+            .flatMap { cp -> clientPaymentRepository.save(cp) }
     }
 }
 

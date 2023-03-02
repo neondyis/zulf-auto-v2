@@ -4,6 +4,7 @@ import com.zulfauto.backend.models.Feature
 import com.zulfauto.backend.services.FeatureService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -14,12 +15,12 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/features")
 class FeatureController(@Autowired private val featureService: FeatureService) {
-    @GetMapping("/all/filtered")
+    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun getFeaturesByDynamicFilter(@RequestBody feature: Feature): ResponseEntity<Flux<Feature>> {
         return ResponseEntity.status(HttpStatus.OK).body(feature.name?.let { featureService.getAllByDynamicFilter(it) })
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun getAllFeatures(): ResponseEntity<Flux<Feature>> {
         return ResponseEntity.status(HttpStatus.OK).body(featureService.getAll())
     }
@@ -40,5 +41,11 @@ class FeatureController(@Autowired private val featureService: FeatureService) {
     @PreAuthorize("hasRole('Admin')")
     fun createFeature(@RequestBody feature: Feature): ResponseEntity<Mono<Feature>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(featureService.save(feature))
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasRole('Admin')")
+    fun importFeature(@RequestBody features: Flux<Feature>): ResponseEntity<Flux<Feature>> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(featureService.import(features))
     }
 }

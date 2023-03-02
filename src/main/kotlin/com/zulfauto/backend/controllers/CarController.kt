@@ -5,6 +5,7 @@ import com.zulfauto.backend.models.Car
 import com.zulfauto.backend.services.CarService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -15,13 +16,13 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/cars")
 class CarController(@Autowired private val carService: CarService) {
-    @GetMapping("/all/filtered")
+    @GetMapping("/all/filtered", produces = [TEXT_EVENT_STREAM_VALUE])
     @PreAuthorize("hasRole('Admin')")
     fun getCarsByDynamicFilter(@RequestBody car: Car): ResponseEntity<Flux<CarDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carService.getAllByDynamicFilter(car))
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all", produces = [TEXT_EVENT_STREAM_VALUE])
     fun getAllCars(): ResponseEntity<Flux<CarDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(carService.getAll())
     }
@@ -52,7 +53,7 @@ class CarController(@Autowired private val carService: CarService) {
 
     @PostMapping("/import")
     @PreAuthorize("hasRole('Admin')")
-    fun importCar(@RequestBody cars: List<Car>): ResponseEntity<Mono<MutableList<Car>>> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(carService.import(Flux.fromIterable(cars)))
+    fun importCar(@RequestBody cars: Flux<Car>): ResponseEntity<Flux<Car>> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(carService.import(cars))
     }
 }

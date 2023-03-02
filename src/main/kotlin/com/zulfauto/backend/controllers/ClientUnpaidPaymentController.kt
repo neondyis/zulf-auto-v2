@@ -5,6 +5,7 @@ import com.zulfauto.backend.models.ClientUnpaidPayment
 import com.zulfauto.backend.services.ClientUnpaidPaymentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -15,13 +16,13 @@ import reactor.core.publisher.Mono
 @CrossOrigin
 @RequestMapping("/api/clients/payments/unpaid")
 class ClientUnpaidPaymentController(@Autowired private val clientUnpaidPaymentService: ClientUnpaidPaymentService) {
-    @GetMapping("/all/filtered")
+    @GetMapping("/all/filtered", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun getUnpaidPaymentsByDynamicFilter(@RequestBody clientUnpaidPayment: ClientUnpaidPayment): ResponseEntity<Flux<ClientUnpaidPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK)
             .body(clientUnpaidPaymentService.getAllByDynamicFilter(clientUnpaidPayment))
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun getAllUnpaidPayments(): ResponseEntity<Flux<ClientUnpaidPaymentDto>> {
         return ResponseEntity.status(HttpStatus.OK).body(clientUnpaidPaymentService.getAll())
     }
@@ -42,5 +43,11 @@ class ClientUnpaidPaymentController(@Autowired private val clientUnpaidPaymentSe
     @PreAuthorize("hasRole('Admin')")
     fun createUnpaidPayment(@RequestBody clientUnpaidPayment: ClientUnpaidPayment): ResponseEntity<Mono<ClientUnpaidPayment>> {
         return ResponseEntity.status(HttpStatus.CREATED).body(clientUnpaidPaymentService.save(clientUnpaidPayment))
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasRole('Admin')")
+    fun importUnpaidPayment(@RequestBody clientUnpaidPayments: Flux<ClientUnpaidPayment>): ResponseEntity<Flux<ClientUnpaidPayment>> {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clientUnpaidPaymentService.import(clientUnpaidPayments))
     }
 }
