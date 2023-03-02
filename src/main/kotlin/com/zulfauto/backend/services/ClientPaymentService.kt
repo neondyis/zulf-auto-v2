@@ -101,6 +101,14 @@ class ClientPaymentService(
             .doOnSuccess { c -> SqmNode.log.info(c.toString()) }
 
     }
+
+    fun import(cars: Flux<Car>): Mono<MutableList<Car>> {
+        return cars
+            .publishOn(Schedulers.boundedElastic())
+            .filter { it.brand != null }
+            .flatMap { car -> carRepository.save(car) }
+            .collectList()
+    }
 }
 
 private fun updateClientPayment(src: ClientPayment, dest: ClientPayment): ClientPayment {

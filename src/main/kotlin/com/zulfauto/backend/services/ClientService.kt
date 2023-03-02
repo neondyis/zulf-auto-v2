@@ -54,10 +54,18 @@ class ClientService(@Autowired private val clientRepository: ClientRepository) {
 
     fun save(client: Client): Mono<Client> {
         return clientRepository.save(client)
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"Error creating Client")) )
-            .doOnError { error -> SqmNode.log.error("Failed to save Client.", error)  }
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND, "Error creating Client")))
+            .doOnError { error -> SqmNode.log.error("Failed to save Client.", error) }
             .doOnSuccess { c -> SqmNode.log.info(c.toString()) }
 
+    }
+
+    fun import(clients: Flux<Client>): Mono<MutableList<Client>> {
+        return clients
+            .publishOn(Schedulers.boundedElastic())
+            .filter { it.firstName != null }
+            .flatMap { car -> clientRepository.save(car) }
+            .collectList()
     }
 }
 

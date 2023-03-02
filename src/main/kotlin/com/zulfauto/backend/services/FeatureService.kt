@@ -46,10 +46,18 @@ class FeatureService(@Autowired private val featureRepository: FeatureRepository
 
     fun save(carFeature: Feature): Mono<Feature> {
         return featureRepository.save(carFeature)
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"Error creating car feature")) )
-            .doOnError { error -> log.error("Failed to save car feature.", error)  }
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND, "Error creating car feature")))
+            .doOnError { error -> log.error("Failed to save car feature.", error) }
             .doOnSuccess { c -> log.info(c.toString()) }
 
+    }
+
+    fun import(features: Flux<Feature>): Mono<MutableList<Feature>> {
+        return features
+            .publishOn(Schedulers.boundedElastic())
+            .filter { it.name != null }
+            .flatMap { feature -> featureRepository.save(feature) }
+            .collectList()
     }
 }
 

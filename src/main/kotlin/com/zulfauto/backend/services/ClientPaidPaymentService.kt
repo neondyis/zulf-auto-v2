@@ -95,10 +95,25 @@ class ClientPaidPaymentService(
 
     fun save(clientPaidPayment: ClientPaidPayment): Mono<ClientPaidPayment> {
         return clientPaidPaymentRepository.save(clientPaidPayment)
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"Error creating Client Paid Payment")) )
-            .doOnError { error -> SqmNode.log.error("Failed to save Client Paid Payment.", error)  }
+            .switchIfEmpty(
+                Mono.error(
+                    ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Error creating Client Paid Payment"
+                    )
+                )
+            )
+            .doOnError { error -> SqmNode.log.error("Failed to save Client Paid Payment.", error) }
             .doOnSuccess { c -> SqmNode.log.info(c.toString()) }
 
+    }
+
+    fun import(clientPaidPayments: Flux<ClientPaidPayment>): Mono<MutableList<ClientPaidPayment>> {
+        return clientPaidPayments
+            .publishOn(Schedulers.boundedElastic())
+            .filter { it.amount != null }
+            .flatMap { cpp -> clientPaidPaymentRepository.save(cpp) }
+            .collectList()
     }
 }
 

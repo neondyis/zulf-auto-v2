@@ -95,10 +95,25 @@ class ClientUnpaidPaymentService(
 
     fun save(clientUnpaidPayment: ClientUnpaidPayment): Mono<ClientUnpaidPayment> {
         return clientUnpaidPaymentRepository.save(clientUnpaidPayment)
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"Error creating Client Unpaid Payment")) )
-            .doOnError { error -> SqmNode.log.error("Failed to save Client Unpaid Payment.", error)  }
+            .switchIfEmpty(
+                Mono.error(
+                    ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Error creating Client Unpaid Payment"
+                    )
+                )
+            )
+            .doOnError { error -> SqmNode.log.error("Failed to save Client Unpaid Payment.", error) }
             .doOnSuccess { c -> SqmNode.log.info(c.toString()) }
 
+    }
+
+    fun import(clientUnpaidPayments: Flux<ClientUnpaidPayment>): Mono<MutableList<ClientUnpaidPayment>> {
+        return clientUnpaidPayments
+            .publishOn(Schedulers.boundedElastic())
+            .filter { it.clientPayment != null }
+            .flatMap { car -> clientUnpaidPaymentRepository.save(car) }
+            .collectList()
     }
 }
 

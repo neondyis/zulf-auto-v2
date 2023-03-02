@@ -98,10 +98,17 @@ class CarFeatureService(
     @jakarta.transaction.Transactional
     fun save(carFeature: CarFeature): Mono<CarFeature> {
         return carFeatureRepository.save(carFeature)
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"Error creating car feature")) )
-            .doOnError { error -> log.error("Failed to save car feature.", error)  }
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND, "Error creating car feature")))
+            .doOnError { error -> log.error("Failed to save car feature.", error) }
             .doOnSuccess { c -> log.info(c.toString()) }
+    }
 
+    fun import(carFeatures: Flux<CarFeature>): Mono<MutableList<CarFeature>> {
+        return carFeatures
+            .publishOn(Schedulers.boundedElastic())
+            .filter { it.car != null }
+            .flatMap { cf -> carFeatureRepository.save(cf) }
+            .collectList()
     }
 }
 

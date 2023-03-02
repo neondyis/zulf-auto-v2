@@ -86,10 +86,18 @@ class ExpenseService(
 
     fun save(expense: Expense): Mono<Expense> {
         return expenseRepository.save(expense)
-            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND,"Error creating Expense")) )
-            .doOnError { error -> SqmNode.log.error("Failed to save Expense.", error)  }
+            .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.NOT_FOUND, "Error creating Expense")))
+            .doOnError { error -> SqmNode.log.error("Failed to save Expense.", error) }
             .doOnSuccess { c -> SqmNode.log.info(c.toString()) }
 
+    }
+
+    fun import(expenses: Flux<Expense>): Mono<MutableList<Expense>> {
+        return expenses
+            .publishOn(Schedulers.boundedElastic())
+            .filter { it.importTax != null }
+            .flatMap { expense -> expenseRepository.save(expense) }
+            .collectList()
     }
 }
 
